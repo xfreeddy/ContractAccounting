@@ -211,6 +211,23 @@ class ContractFormDialog(QDialog):
             QMessageBox.warning(self, "Ошибка", "Пожалуйста, введите сумму договора")
             return
 
+        # Проверка, что сумма — положительное число
+        try:
+            amount = float(self.amount_input[1].text().strip().replace(",", "."))
+        except ValueError:
+            QMessageBox.warning(self, "Ошибка", "Сумма должна быть числом")
+            return
+        if amount <= 0:
+            QMessageBox.warning(self, "Ошибка", "Сумма должна быть больше 0")
+            return
+
+        # Проверка порядка дат
+        if self.end_date[1].date() < self.start_date[1].date():
+            QMessageBox.warning(
+                self, "Ошибка", "Дата окончания не может быть раньше даты начала"
+            )
+            return
+
         # Здесь будет вызов сервиса для сохранения в БД
         # self.accept() закроет диалог с кодом успеха
         self.accept()

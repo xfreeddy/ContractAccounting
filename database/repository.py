@@ -98,19 +98,27 @@ class ContractRepository:
             return []
         try:
             with SessionLocal() as session:
+                # Если запрос состоит только из цифр - считаем, что это поиск
+                # по номеру договора, и ищем ТОЛЬКО по нему. Иначе случайные
+                # ИНН вида "TEMP3A9F1B" (генерируются автоматически, если
+                # ИНН контрагента не указан) будут ложно совпадать с любой
+                # отдельной цифрой и "забивать" результат поиска по номеру.
+                if query.isdigit():
+                    conditions = [Contract.КодДоговора == int(query)]
+                else:
+                    conditions = [
+                        Contract.Наименование.ilike(f"%{query}%"),
+                        Counterparty.ИНН.ilike(f"%{query}%"),
+                        Counterparty.Наименование.ilike(f"%{query}%"),
+                    ]
+
                 results = (
                     session.query(Contract, Counterparty.Наименование)
                     .join(
                         Counterparty,
                         Contract.КодКонтрагента == Counterparty.КодКонтрагента,
                     )
-                    .filter(
-                        or_(
-                            Contract.Наименование.ilike(f"%{query}%"),
-                            Counterparty.ИНН.ilike(f"%{query}%"),
-                            Counterparty.Наименование.ilike(f"%{query}%"),
-                        )
-                    )
+                    .filter(or_(*conditions))
                     .all()
                 )
                 return results
@@ -213,6 +221,11 @@ class CounterpartyRepository:
                     session.add(counterparty)
                     session.commit()
                     # refresh не используем — несовместимо с implicit_returning=False
+
+                # Принудительно загружаем КодКонтрагента, пока сессия открыта,
+                # чтобы избежать DetachedInstanceError при обращении к атрибуту
+                # после закрытия сессии (объект становится detached).
+                _ = counterparty.КодКонтрагента
                 return counterparty
         except Exception as e:
             print(f"Ошибка работы с контрагентом: {e}")

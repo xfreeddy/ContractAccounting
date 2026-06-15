@@ -712,6 +712,13 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Ошибка", "Неверный формат даты или суммы")
             return
 
+        # Проверка бизнес-правил через сервисный слой
+        # (сумма > 0, дата окончания не раньше даты начала)
+        errors = self.service.validate_contract_data(contract_data)
+        if errors:
+            QMessageBox.warning(self, "Ошибка", "\n".join(errors))
+            return
+
         if self.service.create_with_counterparty(contract_data, cp):
             QMessageBox.information(self, "Успех", "Договор сохранен!")
             self._clear_form()

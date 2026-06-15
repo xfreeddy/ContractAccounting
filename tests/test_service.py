@@ -10,7 +10,7 @@ from datetime import date, timedelta
 
 def test_validation_empty_name():
     svc = ContractService()
-    assert "Название договора обязательно" in svc.validate(
+    assert "Название договора обязательно" in svc.validate_contract_data(
         {
             "Сумма": 100,
             "ДатаНачала": date.today(),
@@ -21,7 +21,7 @@ def test_validation_empty_name():
 
 def test_validation_negative_amount():
     svc = ContractService()
-    assert "Сумма должна быть больше нуля" in svc.validate(
+    assert "Сумма договора должна быть больше 0" in svc.validate_contract_data(
         {
             "Наименование": "Тест",
             "Сумма": -50,
@@ -34,7 +34,7 @@ def test_validation_negative_amount():
 def test_validation_date_order():
     svc = ContractService()
     today = date.today()
-    assert "Дата окончания не может быть раньше начала" in svc.validate(
+    assert "Дата окончания не может быть раньше даты начала" in svc.validate_contract_data(
         {
             "Наименование": "Тест",
             "Сумма": 100,
