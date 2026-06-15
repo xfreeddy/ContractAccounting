@@ -7,6 +7,9 @@ on:
     branches: ["**"]
   workflow_dispatch:
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   build-and-test:
     name: Тесты, линтер и сборка .exe
@@ -38,8 +41,9 @@ jobs:
           pip install pyinstaller
 
       - name: Проверка кода линтером flake8
-        run: flake8 . --max-line-length=120 --exclude=.venv,venv,build,dist
-        continue-on-error: true
+        run: |
+          flake8 . --max-line-length=120 --exclude=.venv,venv,build,dist || echo "flake8 warnings found, continuing..."
+        shell: bash
 
       - name: Запуск модульных тестов (pytest)
         run: pytest -v
