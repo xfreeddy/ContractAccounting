@@ -14,24 +14,28 @@ jobs:
 
     steps:
       - name: Получить исходный код
-        uses: actions/checkout@v5
+        uses: actions/checkout@v4
 
       - name: Установить Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v5
         with:
           python-version: "3.12"
           cache: "pip"
+
+      - name: Установить ODBC Driver 17 for SQL Server
+        shell: powershell
+        run: |
+          $url = "https://go.microsoft.com/fwlink/?linkid=2168524"
+          $installer = "$env:TEMP\msodbcsql.msi"
+          Invoke-WebRequest -Uri $url -OutFile $installer
+          Start-Process msiexec.exe -Wait -ArgumentList "/i `"$installer`" /quiet /norestart IACCEPTMSODBCSQLLICENSETERMS=YES"
+          Write-Host "ODBC Driver 17 installed"
 
       - name: Установить зависимости
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           pip install pyinstaller
-
-      - name: Установить ODBC Driver 17 for SQL Server
-        run: |
-          choco install sqlserver-odbcdriver -y --no-progress
-        shell: powershell
 
       - name: Проверка кода линтером flake8
         run: flake8 . --max-line-length=120 --exclude=.venv,venv,build,dist
@@ -50,7 +54,7 @@ jobs:
           main.py
 
       - name: Загрузить готовый .exe как артефакт сборки
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v4
         with:
           name: ContractAccounting-exe
           path: dist/ContractAccounting.exe
