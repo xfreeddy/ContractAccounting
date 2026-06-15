@@ -18,6 +18,9 @@ from PySide6.QtWidgets import (
 from PySide6.QtCore import Qt
 from database.repository import ContractRepository, test_connection, DB_AVAILABLE
 from services.contract_service import ContractService
+from logger_config import get_logger
+
+logger = get_logger(__name__)
 
 
 class MainWindow(QMainWindow):
@@ -730,6 +733,7 @@ class MainWindow(QMainWindow):
                 "Статус": "Активен",
             }
         except ValueError:
+            logger.warning(f"Ошибка валидации формата при сохранении договора: name={name}, amount={amount}, end_date={end_date}")
             QMessageBox.warning(self, "Ошибка", "Неверный формат даты или суммы")
             return
 
@@ -737,8 +741,11 @@ class MainWindow(QMainWindow):
         # (сумма > 0, дата окончания не раньше даты начала)
         errors = self.service.validate_contract_data(contract_data)
         if errors:
+            logger.warning(f"Ошибки валидации бизнес-правил: {errors}; данные: {contract_data}")
             QMessageBox.warning(self, "Ошибка", "\n".join(errors))
             return
+
+        logger.info(f"Сохранение договора: {contract_data}, контрагент={cp}")
 
         if self.editing_row is not None:
             # Режим редактирования — обновляем существующий договор

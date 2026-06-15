@@ -14,6 +14,9 @@ from PySide6.QtWidgets import (
 )
 from PySide6.QtCore import Qt
 from database.repository import UserRepository
+from logger_config import get_logger
+
+logger = get_logger(__name__)
 
 
 class LoginWindow(QDialog):
@@ -126,6 +129,8 @@ class LoginWindow(QDialog):
 
         self.user_data = UserRepository.authenticate(login, password)
         if self.user_data:
+            logger.info(f"Успешный вход пользователя: {login}")
             self.accept()
         else:
+            logger.warning(f"Неудачная попытка входа: {login}")
             self._show_error("Неверный логин или пароль")
