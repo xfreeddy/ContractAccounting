@@ -16,10 +16,10 @@ jobs:
 
     steps:
       - name: Получить исходный код
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Установить Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
           python-version: "3.12"
           cache: "pip"
@@ -49,7 +49,7 @@ jobs:
           main.py
 
       - name: Загрузить готовый .exe как артефакт сборки
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ContractAccounting-exe
           path: dist/ContractAccounting.exe
