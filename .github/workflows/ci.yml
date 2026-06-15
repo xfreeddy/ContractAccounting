@@ -1,7 +1,5 @@
 name: CI
 
-# Запускаем при каждом push и pull request в любую ветку,
-# а также вручную из вкладки Actions на GitHub.
 on:
   push:
     branches: ["**"]
@@ -30,9 +28,12 @@ jobs:
           pip install -r requirements.txt
           pip install pyinstaller
 
+      - name: Установить ODBC Driver 17 for SQL Server
+        run: |
+          choco install sqlserver-odbcdriver -y --no-progress
+        shell: powershell
+
       - name: Проверка кода линтером flake8
-        # Не блокирует пайплайн при замечаниях линтера,
-        # но результат виден в логе.
         run: flake8 . --max-line-length=120 --exclude=.venv,venv,build,dist
         continue-on-error: true
 
